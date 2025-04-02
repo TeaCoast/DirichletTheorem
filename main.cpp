@@ -3,6 +3,7 @@
 #include <string>
 #include "include/BigInt.hpp"
 #include "pi.hpp"
+#include "fraction.cpp"
 
 
 typedef int64_t int_t;
