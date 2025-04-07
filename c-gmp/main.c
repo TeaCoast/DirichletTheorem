@@ -9,17 +9,31 @@
 
 typedef int64_t int_t;
 
-/* Goals:
-1. create a arbitrary precision rational number
-2. perform required operations on rational number
-3. pass the rational number to a function
-4. create a list of rational numbers
-*/
 
 typedef struct {
     mpq_t lo;
     mpq_t hi;
 } ARange;
+
+void cListToFrac(mpq_t result, int_t n, int_t* c_list) {
+    mpq_t c_frac;
+    mpq_init(c_frac);
+    mpq_init(result);
+
+    int_t i = n - 1;
+    mpz_set_si(mpq_numref(c_frac), c_list[i]);
+    mpq_set(result, c_frac);
+    i--;
+
+    while (i >= 0) {
+        mpq_inv(result, result);
+        mpz_set_si(mpq_numref(c_frac), c_list[i]);
+        mpq_add(result, result, c_frac);
+        i--;
+    }
+
+    mpq_clear(c_frac);
+}
 
 ARange decToARange(char* number_string, int_t right_digits) {
     int_t number_size = strlen(number_string);
@@ -79,8 +93,9 @@ ARange decToARange(char* number_string, int_t right_digits) {
     return arange;
 }
 
-int cfaSimple(mpq_t a, int_t n, mpz_t* c_list) {
+int cfaSimple(mpq_t a, int_t n, int_t* c_list) {
     mpz_t c;
+    int_t c_int;
     mpq_t c_sub, r;
     mpz_init(c);
     mpq_init(c_sub);
@@ -91,8 +106,7 @@ int cfaSimple(mpq_t a, int_t n, mpz_t* c_list) {
     for (int_t i = 0; i < n; i++) {
         mpz_fdiv_q(c, mpq_numref(r), mpq_denref(r));
 
-        mpz_init(c_list[i]);
-        mpz_set(c_list[i], c);
+        c_list[i] = mpz_get_si(c);
         
         mpq_set_num(c_sub, c);
         mpq_sub(r, r, c_sub);
@@ -111,7 +125,7 @@ int cfaSimple(mpq_t a, int_t n, mpz_t* c_list) {
     return n;    
 }
 
-int cfaLimit(ARange arange, int_t n, mpz_t* c_list) {
+int cfaLimit(ARange arange, int_t n, int_t* c_list) {
     mpz_t c1, c2;
     mpq_t c_sub, r1, r2;
     mpz_init(c1);
@@ -135,8 +149,7 @@ int cfaLimit(ARange arange, int_t n, mpz_t* c_list) {
             return i;
         }
         
-        mpz_init(c_list[i]);
-        mpz_set(c_list[i], c1);
+        c_list[i] = mpz_get_si(c1);
         
         mpq_set_num(c_sub, c1);
         mpq_sub(r1, r1, c_sub);
@@ -166,24 +179,32 @@ int cfaLimit(ARange arange, int_t n, mpz_t* c_list) {
 int main() {
     char* number_string = PI;
     
-    ARange arange = decToARange(number_string, 10);
+    ARange arange = decToARange(number_string, 1000);
     
-    printf("Result: ");
+    printf("Alpha Approximation: ");
     mpq_out_str(stdout, 10, arange.lo);
-    printf("\n");
+    printf("\n\n");
 
-    int_t n = 10;
-    mpz_t c_list[n];
+    int_t n = 990;
+    int_t c_list[n];
 
     int_t length = cfaLimit(arange, n, c_list);
 
-    for (int_t i = 0; i < length; i++) {
-        mpz_out_str(stdout, 10, c_list[i]);
-        printf(", ");
-        mpz_clear(c_list[i]);
+    printf("c list (count: %i) = \n%i\n", length, c_list[0]);
+    for (int_t i = 1; i < length; i++) {
+        printf(", %i", c_list[i]);
     }
-    printf("\n");
+    printf("\n\n");
+
     
+    mpq_t result;
+    cListToFrac(result, n, c_list);
+
+    printf("p / q = \n");
+    mpq_out_str(stdout, 10, result);
+    printf("\n\n");
+
+    mpq_clear(result);
     mpq_clear(arange.lo);
     mpq_clear(arange.hi);
     
