@@ -5,7 +5,7 @@
 #include "gmp/mini-gmp.h"
 #include "gmp/mini-gmpxx.h"
 
-#include "pi.hpp"
+#include "irrationals.hpp"
 
 typedef int64_t int_t;
 
@@ -129,13 +129,13 @@ std::string divideFraction(Frac frac, int_t decimals) {
 }
 
 int main() {
-    std::string number_string = PI;
+    std::string number_string = PHI;
     
     RationalRange aRange = decToRRange(number_string, -1);
 
     std::cout << "Alpha Approximation: " << aRange.lo.num.get_str() << " / " << aRange.lo.den.get_str() << "\n" << std::endl;
 
-    int_t n = 1000;
+    int_t n = 5000;
     int_t c_list[n];
 
     int_t length = cfaStop(aRange, n, c_list);
