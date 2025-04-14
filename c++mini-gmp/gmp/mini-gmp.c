@@ -41,6 +41,9 @@ see https://www.gnu.org/licenses/.  */
    mpn/generic/sbpi1_div_qr.c, mpn/generic/sub_n.c,
    mpn/generic/submul_1.c. */
 
+#ifndef MINI_GMP_C
+#define MINI_GMP_C
+
 #include <assert.h>
 #include <ctype.h>
 #include <limits.h>
@@ -4412,3 +4415,5 @@ mpz_export (void *r, size_t *countp, int order, size_t size, int endian,
 
   return r;
 }
+
+#endif
